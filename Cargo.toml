@@ -1,0 +1,15 @@
+[package]
+name = "rusty_experiments"
+version = "0.1.0"
+authors = []
+edition = "2021"
+
+[features]
+default = []
+dhat-on = []
+
+[profile.release]
+incremental = true
+debug = true
+lto = false
+[dependencies]
