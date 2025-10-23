@@ -1,4 +1,4 @@
-use rusty_experiments::lib::print_hello_world;
+// use rusty_experiments::lib::print_hello_world;
 
 use std::fs::*;
 use std::io::{Read,Error};
@@ -8,36 +8,15 @@ use std::io::BufReader;
 
 fn main() -> Result<(), Error> {
     let input_file = File::open("README.md")?;
-    let mut reader = BufReader::new(input_file);
+    let reader = BufReader::new(input_file);
     let mbr : MyBR<_> = MyBR(reader);
-
-    let chunk_size = 5;
-    let mut output = File::create("output.txt")?;
-    let mut bytes_read = 0;
-
-    let mut buffer = vec![0u8; chunk_size];
-
-    // loop {
-    //	let bread = reader.read(&mut buffer)?;
-    //	bytes_read += bread;
-    //	println!("bytes read is {}",bread);
-    //	if bread < chunk_size { break }
-    // }
-    /*
-	let encrypted_blocks : Vec<Vec<u8>> = blocks.iter().map(|b| {
-	    // copy from the block
-	    let mut buf : Vec<u8>  = b.to_vec();
-	    buf.resize(blocksize,0u8); // zero pad if shorter than blocksize
-	    key.apply_keystream(&mut buf); // encrypt
-	    return buf;
-	} ).collect();
-    */
-    println!("total bytes read is {:?}",bytes_read);
-    print_hello_world();
+    let something: Vec<Vec<u8>> = mbr.into_iter().collect(); // .collect();
+    println!("{:?}",something);
+    // println!("{:?}",mbr.into_iter().next());
     Ok(())
 }
 
-// newtype MyBR = BufRead
+#[derive(Debug)]
 struct MyBR<R>(BufReader<R>) where R: Read;
 
 impl<R> Iterator for MyBR<R>
@@ -46,10 +25,11 @@ where R: Read
     type Item = Vec<u8>;
 
     fn next(&mut self) -> Option<Self::Item> {
-	let mut buf : Vec<u8> = Vec::with_capacity(512);
-	let bytes_read = self.0.read_exact(&mut buf);
+	let mut buf : Vec<u8> = Vec::with_capacity(8);
+	buf.resize(8, 0u8);
+	let bytes_read = self.0.read(&mut buf);
 	match bytes_read {
-	    Ok(_) => Some(buf),
+	    Ok(v) => if v > 0 {Some(buf)} else {None},
 	    Err(_) => None,
 	}
     }
