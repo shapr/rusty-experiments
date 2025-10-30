@@ -9,7 +9,7 @@ use std::io::BufReader;
 fn main() -> Result<(), Error> {
     let input_file = File::open("README.md")?;
     let reader = BufReader::new(input_file);
-    let mbr : MyBR<_> = MyBR(reader);
+    let mbr : BufReaderIterator<_> = BufReaderIterator{reader, blocksize: 4096};
     let something: Vec<Vec<u8>> = mbr.into_iter().collect();
     println!("{:?}",something);
     // println!("{:?}",mbr.into_iter().next());
@@ -17,31 +17,29 @@ fn main() -> Result<(), Error> {
 }
 
 #[derive(Debug)]
-struct MyBR<R>(BufReader<R>) where R: Read;
+pub struct BufReaderIterator<R> where R: Read {
+    reader: BufReader<R>,
+    blocksize: usize,
+}
 
-impl<R> Iterator for MyBR<R>
+impl<R> BufReaderIterator<R> where R: Read {
+    pub fn new(reader: BufReader<R>, blocksize: usize) -> Self {
+	Self { reader, blocksize }
+    }
+}
+
+impl<R> Iterator for BufReaderIterator<R>
 where R: Read
 {
     type Item = Vec<u8>;
 
     fn next(&mut self) -> Option<Self::Item> {
-	let mut buf : Vec<u8> = Vec::with_capacity(8);
-	buf.resize(8, 0u8);
-	let bytes_read = self.0.read(&mut buf);
+	let mut buf : Vec<u8> = Vec::with_capacity(self.blocksize);
+	buf.resize(self.blocksize, 0u8);
+	let bytes_read = self.reader.read(&mut buf);
 	match bytes_read {
 	    Ok(v) => if v > 0 {Some(buf)} else {None},
 	    Err(_) => None,
 	}
     }
 }
-
-// impl MyBR<R> {
-//     fn new
-// }
-// impl <R> Iterator for BufReader<R> where R : Read {
-//     type Item = Vec<u8>;
-
-//     fn next(&mut self) -> Option<Self::Item> {
-//	todo!()
-//     }
-// }
