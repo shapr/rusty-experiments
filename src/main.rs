@@ -10,7 +10,7 @@ fn main() -> Result<(), Error> {
     let input_file = File::open("README.md")?;
     let reader = BufReader::new(input_file);
     let mbr : MyBR<_> = MyBR(reader);
-    let something: Vec<Vec<u8>> = mbr.into_iter().collect(); // .collect();
+    let something: Vec<Vec<u8>> = mbr.into_iter().collect();
     println!("{:?}",something);
     // println!("{:?}",mbr.into_iter().next());
     Ok(())
@@ -35,6 +35,9 @@ where R: Read
     }
 }
 
+// impl MyBR<R> {
+//     fn new
+// }
 // impl <R> Iterator for BufReader<R> where R : Read {
 //     type Item = Vec<u8>;
 
